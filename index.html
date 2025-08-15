@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cek Aset Mini</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+body{font-family:sans-serif;margin:20px}
+input[type=text]{width:300px;padding:5px;margin-right:5px}
+button{padding:5px}
+.result{margin-top:20px}
+.result div{margin-bottom:5px}
+</style>
+</head>
+<body>
+<h2>Cek Aset Mini</h2>
+<input type="text" id="kodeAset" placeholder="Masukkan kode aset">
+<button id="searchBtn">🔍</button>
+<div class="result" id="result"></div>
+
+<script>
+// URL CSV Sheet5 publik Anda
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn-KkQwz6A6Pp-FakeURL/pub?output=csv"; 
+let data = [];
+
+Papa.parse(sheetUrl, {
+    download: true,
+    header: true,
+    complete: function(results) {
+        data = results.data.filter(r => r.E); // pastikan ada Kode Aset
+    }
+});
+
+function formatResult(row){
+    return `
+    <div><strong>Kode Aset:</strong> ${row.E}</div>
+    <div><strong>Deskripsi:</strong> ${row.F}</div>
+    <div><strong>Kapitalisasi:</strong> ${row.G}</div>
+    <div><strong>Nilai Perolehan:</strong> ${row.T}</div>
+    <div><strong>Lokasi:</strong> ${row.N}</div>
+    <div><strong>Detail Lokasi:</strong> ${row.O}</div>
+    <div><strong>Kondisi:</strong> ${row.P}</div>
+    <div><strong>Opname Terakhir:</strong> ${row.K || row.J}</div>
+    <div><strong>Keterangan:</strong> ${row.Q || row.U}</div>
+    `;
+}
+
+document.getElementById("searchBtn").addEventListener("click", function(){
+    let kode = document.getElementById("kodeAset").value.trim();
+    if(kode.length === 8 && !kode.includes("-")) kode += "-0";
+    const row = data.find(r => r.E === kode);
+    document.getElementById("result").innerHTML = row ? formatResult(row) : "Data tidak ditemukan";
+});
+
+document.getElementById("kodeAset").addEventListener("keypress", function(e){
+    if(e.key === "Enter") document.getElementById("searchBtn").click();
+});
+</script>
+</body>
+</html>
